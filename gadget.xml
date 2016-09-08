@@ -1,418 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-  <ModulePrefs title="Hello World"
-    description="Matches and echoes 'Hello World' string in emails"
+  <ModulePrefs title="Add-in Express Answers"
+    description="Answers to your Add-in Express questions"
     height="20"
-    author="Sarah M and Walter Q"
-    author_email="..."
-    author_location="Mountain View, CA">
-
-    <!-- Declare feature dependencies. -->
-
-    <!-- This one is not specific to Gmail contextual gadgets. -->
+    author="Add-in Express"
+    author_email="add-in-express.com"
+    author_location="Belarus">
     <Require feature="dynamic-height"/>
 
-    <!-- This isolates the gadget from others on the same page because it will
-         do contacts stuff. -->
-    <Require feature="locked-domain"/>
-
-    <!-- OAuth for some contacts access -->
-    <OAuth>
-        <Service name="google">
-            <Access url="https://www.google.com/accounts/OAuthGetAccessToken"
-                method="GET" /> 
-            <Request
-                url="https://www.google.com/accounts/OAuthGetRequestToken?scope=http://www.google.com/m8/feeds/"
-                method="GET" /> 
-            <Authorization
-                url="https://www.google.com/accounts/OAuthAuthorizeToken?oauth_callback=http://oauth.gmodules.com/gadgets/oauthcallback"
-                /> 
-        </Service>
-    </OAuth>
-
-    <!-- The next feature, Caja, is optional, and is supported for
-     use only within test domains. Uncomment the tag only for
-     non-production gadgets. -->
-    <!-- <Require feature="caja"/> -->
-
-    <!-- The next feature, google.contentmatch, is required for all
-     Gmail contextual gadgets.
-     <Param> - specify one or more comma-separated extractor IDs in
-     a param named "extractors". This line is overridden by the extractor ID
-     in the manifest, but is still expected to be present. -->
     <Require feature="google.contentmatch">
       <Param name="extractors">
-        google.com:HelloWorld,google.com:SenderEmailExtractor
+        google.com:EmailBodyExtractor
       </Param>
     </Require>
 
   </ModulePrefs>
 
-  <!-- Define the content type and display location. The settings
-   "html" and "card" are required for all Gmail contextual gadgets. -->
   <Content type="html" view="card">
     <![CDATA[
-        <script type='text/javascript'
-            src='http://www.google.com/jsapi'></script>
-        <script type='text/javascript'
-            src='http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'></script>
-        <script type='text/javascript'
-            src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js'></script>
-        <!-- shindig oauth popup handling code --> 
-        <script src="http://github.com/tgevaert/gmail-contextual-hello-world-gadget/raw/master/popup.js"></script> 
-        <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/themes/start/jquery-ui.css" type="text/css" media="screen" />
-        <style>
-        #main {
-            margin: 0px;
-            padding: 0px;
-            font-size: small;
-        }
-        </style>
-        <!-- <div id="main" style="display: none">
-        </div>
-        <div id="approval" style="display: none">
-            <img src="http://gadget-doc-examples.googlecode.com/svn/trunk/images/new.gif">
-            <a href="#" id="personalize">Personalize this gadget</a>
-        </div>
-        <div id="waiting" style="display: none">
-            Please click
-            <a href="#" id="approvaldone">I've approved access</a>
-            once you've approved access to your data.
-        </div> -->
-        <div id="loadinggadget"><h2>Loading Gadget</h2></div>
-        <div id="loadingjsapi" style="display: none"><h2>Loading JSAPI</h2></div>
-        <div id="contactinfo"><h3></h3><ul id="grouplist"></ul></div>
-        <div id="contactsubmit" style="display: none"><h3></h3>
-            <label for="sendername">Contact Name: </label><input type="Text" id="sendername" />
-        </div>
-        <div id="groupadd" style="display: none">
-            <label for="groupinput">Add to group: </label>
-            <input type="Text" id="groupinput" />
-            <input id="b" type="button" value="Add" />
-        </div>
-        <script type="text/javascript">
-        var contacts = null; // make service object global
-        var feedUri = 'http://www.google.com/m8/feeds/contacts/default/full';
-        var emailSender = null; // extract email of message sender
-        var emailSenderContact = null; // fetch appropriate contact address
-        var groupFeedUri = 'http://www.google.com/m8/feeds/groups/default/full'; 
-        var groupHash = null; // make a group Hash global
-        var groupHashKeys = null; // May as well build this at the same time as
-                                  // the groupHash
-        // Display UI depending on OAuth access state of the gadget (see <divs> above).
-        // If user hasn't approved access to data, provide a "Personalize this gadget" link
-        // that contains the oauthApprovalUrl returned from makeRequest.
-        //
-        // If the user has opened the popup window but hasn't yet approved access, display
-        // text prompting the user to confirm that s/he approved access to data.  The user
-        // may not ever need to click this link, if the gadget is able to automatically
-        // detect when the user has approved access, but showing the link gives users
-        // an option to fetch their data even if the automatic detection fails.
-        //
-        // When the user confirms access, the fetchData() function is invoked again to
-        // obtain and display the user's data.
-        function showOneSection(toshow) {
-          var sections = [ 'main', 'approval', 'waiting' ];
-          for (var i=0; i < sections.length; ++i) {
-            var s = sections[i];
-            var el = document.getElementById(s);
-            if (s === toshow) {
-              el.style.display = "block";
-            } else {
-              el.style.display = "none";
-            }
+      <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+      <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>   
+      <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+      <div id="links" class="list-group">
+      </div>
+      <script type="text/javascript">       
+        matches = google.contentmatch.getContentMatches();        
+        var bodyText = matches[0]["email_body"];
+        var result1 = /^.*\b(create|build|program|develop|office|add-in|plug in|addon)\b.*$/.test(bodyText);
+        var result2 = /^.*\b(handle|trap|intercept|get|newmail)\b.*$/.test(bodyText);
+        var result3 = /^.*\b(add|create|build|program|develop|outlook|task pane|region)\b.*$/.test(bodyText);
+        var result4 = /^.*\b(add|create|build|program|develop|excel|function)\b.*$/.test(bodyText);
+        var result5 = /^.*\b(add|create|build|program|develop|word|button|ribbon|tab)\b.*$/.test(bodyText);
+        
+        var params = {};
+        params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
+        if (result1){
+          var url = "http://www.add-in-express.com/search-addin-json.php?q=create%20build%20program%20develop%20Outlook%20add-in%20plug%20in%20addon";
+        } else if (result2) {    
+          var url = "http://www.add-in-express.com/search-addin-json.php?q=handle%20trap%20intercept%20get%20newmail";
+        } else if (result3) {      
+          var url = "http://www.add-in-express.com/search-addin-json.php?q=add%20create%20build%20program%20develop%20outlook%20task%20pane%20region";
+        } else if (result4) {       
+          var url = "http://www.add-in-express.com/search-addin-json.php?q=add%20create%20build%20program%20develop%20excel%20functions";
+        } else if (result5) {       
+          var url = "http://www.add-in-express.com/search-addin-json.php?q=add%20create%20build%20program%20develop%20word%20button%20ribbon%20tab";
+        } 
+        
+        gadgets.io.makeRequest(url, loadData, params);
+        gadgets.window.adjustHeight(400);   
+        
+        function loadData(obj) {
+          var items = obj.data.result;
+          for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            $("#links").append('<a href="' + item.link + '" target="_blank" class="list-group-item"><h4 class="list-group-item-heading">' + item.title + '</h4><p class="list-group-item-text">' + item.body + '</p></a>');
           }
         }
-        // Process returned JSON feed to display data.
-        function showResults(result) {
-          //showOneSection('main');
-          jQuery('body').html(result.feed.title.$t);
-          jQuery('body').append('<div id="accordion"></div>');
-          resultList = result.feed.entry;
-          for(var i = 0; i < resultList.length; i++) {
-              entry = resultList[i];
-              jQuery('div#accordion').append('<h3><a href="#">' + entry.title.$t +  '</a></h3>');
-              jQuery('div#accordion').append('<div><p>' + entry.gd$email[0].address + '</p></div>');
-          }
-          $(function() {
-                $('div#accordion').accordion();
-                });
-          //var titleElement = document.createElement('div');
-          //var nameNode = document.createTextNode(result.feed.title.$t);
-          //titleElement.appendChild(nameNode);
-          //jQuery('body').append(titleElement);
-          //jQuery('body').append(document.createElement("br"));
-          //list = result.feed.entry;
-          //for(var i = 0; i < list.length; i++) {
-          //  entry = list[i];
-          //  var divElement = document.createElement('div');
-          //  divElement.setAttribute('class', 'name');
-          //  divElement.appendChild(nameNode);
-          //  if (entry.gd$email) {
-          //    var valueNode = document.createTextNode(entry.gd$email[0].address);
-          //    divElement.appendChild(valueNode);
-          //  }
-          //  jQuery('body').append(divElement);
-          //}
-        }
-        function handleError(error) {
-            $('body').append('Frig, error:' + error);
-        }
-                
-        // Extract contact id url
-        function extractContactID(results, address) {
-            for (var result in results){
-                if (results[result].gd$email[0].address == address)
-                    return results[result].id.$t;
-                }
-            return null;
-        }
-        // Get the Href for the group to add
-        function getGroupHref() {
-            var groupName = $('input#groupinput').val();
-            var groupHref = groupHash[groupName];
-            if (groupHref)
-                return groupHref;
-            return null
-        }
-        function createGroup() {
-            var createGroupCallback = function(entryRoot) {
-                var entry = entryRoot.entry;
-                var groupName = entry.getTitle().getText();
-                groupHash[groupName] = entry.getId().getValue();
-                groupHashKeys.push(groupName);
-                addContactToGroup();
-            }
-            var groupName = $('input#groupinput').val();
-            var groupEntry = new google.gdata.contacts.ContactGroupEntry();
-            groupEntry.setTitle(google.gdata.atom.Text.create(groupName));
-            contacts.insertEntry(groupFeedUri, groupEntry, createGroupCallback, handleError);
-        }
-        function addContactToGroup() {
-            var groupHref = getGroupHref()
-            if (groupHref != null){
-                emailSenderContact.addGroupMembershipInfo({deleted: false, href: groupHref})
-                emailSenderContact.updateEntry( function() { appendGroupToList($('input#groupinput').val());}, handleError);
-            } else {
-                createGroup();
-            }
-        }
-            
-        // Add contact to contact list.
-        function addContact() {
-            var entry = new google.gdata.contacts.ContactEntry();
-            entry.setTitle(google.gdata.Text.create($('#sendername').val()));
-            var email = new google.gdata.Email();
-            email.setAddress(senderAddress);
-            email.setPrimary(true);
-            email.setRel(google.gdata.Email.REL_HOME);
-            //entry.setEmailAddresses([email]);
-            entry.addEmailAddress(email);
-            var callback = function(result) {
-                emailSenderContact = result.entry;
-                addContactAndGroup();
-            }
-            contacts.insertEntry(feedUri, entry, callback, handleError,
-                                 google.gdata.contacts.ContactEntry);
-        }
-        function addContactAndGroup() {
-            if (emailSenderContact == null) {
-                addContact();
-            } else {
-                addContactToGroup();
-            }
-        }
-            
-        function showGroupTextInput() {
-            $("input#groupinput").autocomplete({ source: groupHashKeys });
-            $('input#b').button();
-            $('input#b').click(addContactAndGroup);
-            $("div#groupadd").show();
-        }
-        // Generate link and button to create new contact
-        function generateSubmitDiv() {
-            $('#contactsubmit > h3').append('Add ' + senderAddress + ' to contact list?');
-            $('div#contactsubmit').show('blind', 500);
-        }
-        function appendGroupToList(groupTitle) {
-            $('ul#grouplist').append('<li>' + groupTitle + '</li>');
-        }
-            
-        function generateInfoDiv() {
-            $('div#contactinfo > h3').html(emailSenderContact.getTitle().getText() + ' is a member of the groups:');
-            var groupList = emailSenderContact.getGroupMembershipInfos();
-            var callback = function(result) {
-                appendGroupToList(result.entry.getTitle().getText());    
-            }
-            for (var group in groupList) {
-                var groupHref = groupList[group].getHref();
-                contacts.getContactGroupEntry(groupHref, callback, handleError);
-            }
-        }
-        // Find the appropriate contact, return it.
-        function extractGDataContact(entries, address) {
-            for (var entry in entries){
-                entry_addresses = entries[entry].getEmailAddresses();
-                for (var entry_address in entry_addresses){
-                    if (entry_addresses[entry_address].address == address)
-                        return entries[entry];
-                    }
-                }
-            return null;
-        }
-        <!-- Start by fetching the array of content matches. -->
-        matches = google.contentmatch.getContentMatches();
-        var matchList = document.createElement('UL');
-        var senderAddress;
-        for (var match in matches) {
-            if (matches[match].sender_email)
-                senderAddress = matches[match].sender_email;
-        }
-        var listItem;
-        var extractedText;
-        // Extract contact Name & Groups
-        function printNameAndGroups (contact) {
-            var params = {};
-            params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
-            params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.OAUTH;
-            params[gadgets.io.RequestParameters.OAUTH_SERVICE_NAME] = "google";
-            params[gadgets.io.RequestParameters.OATH_USE_TOKEN] = "always";
-            params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.GET;
-            jQuery('body').html('<h3>'+contact.title.$t+' is a member of the groups:</h3></br>');
-            for (var group in contact.gContact$groupMembershipInfo){
-                if (contact.gContact$groupMembershipInfo[group].deleted == "false")
-                    gadgets.io.makeRequest(contact.gContact$groupMembershipInfo[group].href+'?alt=json',
-                                           function (response) {
-                                           jQuery('body').append('<p>'+response.data.entry.title.$t+'</p>');
-                                           }, params);
-            }
-        }
-        function initGadget() {
-            gadgets.window.adjustHeight(200);
-            $('#loadinggadget').hide('slide');
-            $('#loadingjsapi').show('slide');
-            $('body').append("Version 0.01");
-            google.load('gdata', '1.x', {packages: ['contacts']});
-            google.setOnLoadCallback(function() {
-                $('#loadingjsapi').hide('slide');
-                contacts = new google.gdata.contacts.ContactsService('yocto-ContactsGadget-0.01');
-                contacts.useOAuth('google');
-                fetchGData();
-                })
-        }
-        function fetchGData() {
-            var contactCallback = function(response) {
-                if (response.oauthApprovalUrl) {
-                    // Create the popup handler. The onOpen function is called when the user 
-                    // opens the popup window. The onClose function is called when the popup 
-                    // window is closed. 
-                    var popup = shindig.oauth.popup({ 
-                        destination: response.oauthApprovalUrl, 
-                        windowOptions: null, 
-                        onOpen: function() {showOneSection('waiting'); }, 
-                        onClose: function() { fetchData(); } 
-                    }); 
-                    // Use the popup handler to attach onclick handlers to UI elements. The 
-                    // createOpenerOnClick() function returns an onclick handler to open the 
-                    // popup window. The createApprovedOnClick function returns an onclick 
-                    // handler that will close the popup window and attempt to fetch the user's 
-                    // data again. 
-                    var personalize = document.getElementById('personalize'); 
-                    personalize.onclick = popup.createOpenerOnClick(); 
-                    var approvaldone = document.getElementById('approvaldone'); 
-                    approvaldone.onclick = popup.createApprovedOnClick(); 
-                    showOneSection('approval'); 
-                } else if (response.feed) {
-                    emailSenderContact = extractGDataContact(response.feed.entry, senderAddress);
-                    if (emailSenderContact == null) {
-                        // Email author is not in contact list.
-                        generateSubmitDiv();
-                    } else {
-                        generateInfoDiv();
-                    }
-                } else {
-                    $('body').append('THIS SHOULD NOT HAPPEN');
-                }
-            }
-            var groupCallback = function(response) {
-                if (response.oauthApprovalUrl) {
-                        // This should be handled by the other callback.
-                    } else if (response.feed) {
-                        groupHash = {};
-                        groupHashKeys = [];
-                        var entries = response.feed.entry;
-                        for (var entry in entries) {
-                            var groupEntry = entries[entry];
-                            var groupName = groupEntry.getTitle().getText();
-                            groupHash[groupName] = groupEntry.getId().getValue();
-                            groupHashKeys.push(groupName);
-                        }
-                        showGroupTextInput();
-                    } else {
-                        // Really bad times.
-                        $('body').append('Group feed messed up');
-                    }
-            }
-            contacts.getContactFeed(feedUri, contactCallback, contactCallback);
-            contacts.getContactGroupFeed(groupFeedUri, groupCallback, groupCallback);
-        }
-        function fetchData() {
-            var params = {};
-            url = "http://www.google.com/m8/feeds/contacts/default/base?alt=json";
-            params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
-            params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.OAUTH;
-            params[gadgets.io.RequestParameters.OAUTH_SERVICE_NAME] = "google";
-            params[gadgets.io.RequestParameters.OATH_USE_TOKEN] = "always";
-            params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.GET;
-            gadgets.io.makeRequest(url, function (response) {
-                if (response.oauthApprovalUrl) {
-                    // Create the popup handler. The onOpen function is called when the user 
-                    // opens the popup window. The onClose function is called when the popup 
-                    // window is closed. 
-                    var popup = shindig.oauth.popup({ 
-                        destination: response.oauthApprovalUrl, 
-                        windowOptions: null, 
-                        onOpen: function() {showOneSection('waiting'); }, 
-                        onClose: function() { fetchData(); } 
-                    }); 
-                    // Use the popup handler to attach onclick handlers to UI elements. The 
-                    // createOpenerOnClick() function returns an onclick handler to open the 
-                    // popup window. The createApprovedOnClick function returns an onclick 
-                    // handler that will close the popup window and attempt to fetch the user's 
-                    // data again. 
-                    var personalize = document.getElementById('personalize'); 
-                    personalize.onclick = popup.createOpenerOnClick(); 
-                    var approvaldone = document.getElementById('approvaldone'); 
-                    approvaldone.onclick = popup.createApprovedOnClick(); 
-                    showOneSection('approval'); 
-                } else if (response.data) {
-                    //showResults(response.data);
-                    emailSender = extractContactID(response.data.feed.entry, senderAddress);
-                    if (emailSender == null) {
-                        jQuery('body').html('This contact is not in your contact list. Add it?');
-                    } else {
-                        gadgets.io.makeRequest(emailSender.replace('/base/','/full/')+'?alt=json', function (response) {
-                            printNameAndGroups(response.data.entry);
-                        }, params);
-                    }
-                } else {
-                    jQuery('body').html('ERROR' + response.oauthError + ': ' + response.oauthErrorText);
-                }
-                }, params);
-        }
-        gadgets.util.registerOnLoadHandler(initGadget);
-                    
-        //<!-- Iterate through the array and display output for each match. -->
-        //for (var match in matches) {
-        //  for (var key in matches[match]) {
-        //    listItem = document.createElement('LI');
-        //    extractedText = document.createTextNode(key + ": " + matches[match][key]);
-        //    listItem.appendChild(extractedText);
-        //    matchList.appendChild(listItem);
-        //  }
-        //}
-        //jQuery('body').html('jQuery, Dog');
-        //document.body.appendChild(matchList);
       </script>
     ]]>
   </Content>
